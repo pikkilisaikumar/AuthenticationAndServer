@@ -1,0 +1,29 @@
+
+
+GET http://localhost:3000/users/
+Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlZhbmkiLCJpYXQiOjE2NDQ4Mjg3NzN9.4tE1AMLN8hZIia7pKIKO7BongpTMLMe80MQo-vEKAOI`
+
+
+###
+
+POST http://localhost:3000/users/
+Content-Type: application/json
+
+{   
+    "name":"rahul",
+    "username":"Vani",
+    "password": "rahul@456",
+    "gender": "Male",
+    "location":"hyderabad"
+}
+
+
+###
+
+POST http://localhost:3000/login/
+Content-Type: application/json
+
+{
+    "username":"Vani",
+    "password": "rahul@456"
+}

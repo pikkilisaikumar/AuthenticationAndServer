@@ -6,7 +6,7 @@ const { open } = require("sqlite");
 const sqlite3 = require("sqlite3");
 
 const app = express();
-app.use(express.json()); //default middleware function..it recougnizing
+app.use(express.json()); //default middleware function..it recougnizing the incoming request object as a json object
 const dbPath = path.join(__dirname, "goodreads.db");
 
 let db = null;
@@ -22,32 +22,36 @@ const initializeDBAndServer = async () => {
     });
   } catch (e) {
     console.log(`DB Error: ${e.message}`);
-    process.exit(1);
+    process.exit(1); //the server process exist
   }
 };
 initializeDBAndServer();
 
 const Logger = (request, response, next) => {
-  const tokenone = request.headers["authorization"];
-  if (tokenone !== undefined) {
-    const jwtFormat = tokenone.split(" ")[1];
-    // console.log(jwtToken);
-    if (jwtFormat !== undefined) {
-      jwt.verify(jwtFormat, "secret_key", async (error, payload) => {
+  let jwtToken;
+  const headerData = request.headers["authorization"];
+  //   console.log(headerData);
+  if (headerData !== undefined) {
+    jwtToken = headerData.split(" ")[1];
+    console.log(jwtToken);
+    if (jwtToken !== undefined) {
+      jwt.verify(jwtToken, "secret_key", async (error, payload) => {
         if (error) {
-          response.send("No Token");
+          response.status(400); //bad request
+          response.send("Invalid Access Token");
         } else {
           request.username = payload.username;
+          //   console.log(payload);
           next();
         }
       });
     } else {
-      response.status(401);
-      response.send("No Token");
+      response.status(400); //bad request
+      response.send("Invalid Access Token");
     }
   } else {
-    response.status(401);
-    response.send("No Token");
+    response.status(400); //bad request
+    response.send("Invalid Access Token");
   }
 };
 
@@ -105,4 +109,16 @@ app.post("/login/", async (request, response) => {
       response.send("Password is Wrong");
     }
   }
+});
+
+app.delete("/users/", Logger, async (request, response) => {
+  const { username } = request;
+  const userDeleteData = `
+     DELETE 
+     FROM 
+     user 
+     WHERE username = '${username}'
+    `;
+  await db.run(userDeleteData);
+  response.send("User is Deleted");
 });
